@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.13.35931.197 d17.13
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SuperNetworkScanner", "SuperNetworkScanner\SuperNetworkScanner.csproj", "{8BC4C1FA-FA30-433C-AB09-BBA6EC32CCED}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SuperNetworkScanner.UI", "SuperNetworkScanner.UI\SuperNetworkScanner.UI.csproj", "{230D5BA8-D1A0-43AD-8637-78BBD52A8D31}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{8BC4C1FA-FA30-433C-AB09-BBA6EC32CCED}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8BC4C1FA-FA30-433C-AB09-BBA6EC32CCED}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8BC4C1FA-FA30-433C-AB09-BBA6EC32CCED}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8BC4C1FA-FA30-433C-AB09-BBA6EC32CCED}.Release|Any CPU.Build.0 = Release|Any CPU
+		{230D5BA8-D1A0-43AD-8637-78BBD52A8D31}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{230D5BA8-D1A0-43AD-8637-78BBD52A8D31}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{230D5BA8-D1A0-43AD-8637-78BBD52A8D31}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{230D5BA8-D1A0-43AD-8637-78BBD52A8D31}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {F3926426-F71F-46A7-BAC2-6917CFC31D63}
+	EndGlobalSection
+EndGlobal
