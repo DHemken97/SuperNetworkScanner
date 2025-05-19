@@ -5,7 +5,8 @@ namespace SuperNetworkScanner.UI
     public partial class StepViewer : Form
     {
         public List<ICollectionStep> CollectionSteps { get; }
-        public int StepIndex { get; set; }  
+        public ICollectionStep CurrentStep { get; private set; }
+        public int StepIndex { get; set; }
         public StepViewer()
         {
             InitializeComponent();
@@ -24,10 +25,32 @@ namespace SuperNetworkScanner.UI
         {
             if (StepIndex >= CollectionSteps.Count) return;
             StepIndex++;
-            var step = CollectionSteps[StepIndex-1];
-            lblStep.Text = $"Step {StepIndex} - {step.Name}";
-            step.Start();
+            CurrentStep = CollectionSteps[StepIndex - 1];
+            lblStep.Text = $"Step {StepIndex} - {CurrentStep.Name}";
+            lblDescription.Text = CurrentStep.Description;
 
+
+        }
+
+        private void btnNext_Click(object sender, EventArgs e)
+        {
+            CurrentStep.Start();
+            btnSkip.Enabled = false;
+            btnNext.Enabled = false;
+        }
+
+        private void btnSkip_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void timer1_Tick(object sender, EventArgs e)
+        {
+            lblStep.Text = $"Step {StepIndex} - {CurrentStep?.Name}";
+            lblDescription.Text = CurrentStep?.Description;
+            progressBar1.Value = (int)(CurrentStep.ProgressPercentage*100);
+            richTextBox1.Text = CurrentStep?.ProgressLog;
+            lblProgressText.Text = CurrentStep?.ProgressMessage;
         }
     }
 }
