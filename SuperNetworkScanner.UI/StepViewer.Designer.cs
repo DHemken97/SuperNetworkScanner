@@ -41,13 +41,13 @@
             lblStep.TabIndex = 0;
             lblStep.Text = "Step 1";
             // 
-            // Form1
+            // StepViewer
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(800, 450);
             Controls.Add(lblStep);
-            Name = "Form1";
+            Name = "StepViewer";
             Text = "Form1";
             ResumeLayout(false);
             PerformLayout();

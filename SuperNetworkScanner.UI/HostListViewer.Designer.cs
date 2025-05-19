@@ -28,7 +28,9 @@
         /// </summary>
         private void InitializeComponent()
         {
+            components = new System.ComponentModel.Container();
             treeView1 = new TreeView();
+            timer1 = new System.Windows.Forms.Timer(components);
             SuspendLayout();
             // 
             // treeView1
@@ -38,6 +40,12 @@
             treeView1.Name = "treeView1";
             treeView1.Size = new Size(800, 450);
             treeView1.TabIndex = 0;
+            // 
+            // timer1
+            // 
+            timer1.Enabled = true;
+            timer1.Interval = 1000;
+            timer1.Tick += timer1_Tick;
             // 
             // HostListViewer
             // 
@@ -53,5 +61,6 @@
         #endregion
 
         private TreeView treeView1;
+        private System.Windows.Forms.Timer timer1;
     }
 }
