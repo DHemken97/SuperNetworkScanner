@@ -22,6 +22,9 @@ namespace SuperNetworkScanner.UI
                 new LocalARPTableStep(),
                 new PingSweepStep(),
                  new DNSQueryStep(),
+               //  new PortScanStep(){Ports = PortScanStep.KnownPortServices.Select(x => x.Key).ToList()},
+                // new PortScanStep(){Ports = new List<int>{ 22,80,443,3389, 135 }  },
+                 new PortScanStep(){Ports = new List<int>{ 80,443 }  },
             };
             CollectionSteps.Add(new FinishedStep());
             IncrementStep();
@@ -47,12 +50,38 @@ namespace SuperNetworkScanner.UI
             {
                 search_ips = new List<string>();
                 var ranges = txtSearchRanges.Text.Split(',');
-                foreach ( var range in ranges ) 
-                    search_ips.AddRange(Enumerable.Range(1, 254).Select(i => range.Replace("x",i.ToString())).ToList());
-                //TODO: make this more flexable with ranges (1-22 for example) 
+                foreach (var range in ranges)
+                {
+                    if (range.Contains(".x"))
+                    {
+                        search_ips.AddRange(Enumerable.Range(1, 254).Select(i => range.Replace("x", i.ToString())).ToList());
+                    }
+                    else if (range.Contains("-")) // Handles IP ranges like 192.168.1.1-25
+                    {
+                        var parts = range.Split('-');
+                        var startIp = parts[0];
+                        var endSuffix = int.Parse(parts[1]);
+
+                        var lastDotIndex = startIp.LastIndexOf('.');
+                        if (lastDotIndex != -1)
+                        {
+                            var prefix = startIp.Substring(0, lastDotIndex + 1); // e.g., "192.168.1."
+                            var startSuffix = int.Parse(startIp.Substring(lastDotIndex + 1)); // e.g., "1"
+
+                            for (int i = startSuffix; i < endSuffix; i++)
+                            {
+                                search_ips.Add(prefix + i.ToString());
+                            }
+                        }
+                    }
+                    else // Handles single IPs like 192.168.1.25
+                    {
+                        search_ips.Add(range);
+                    }
+                }
             }
 
-            if (btnNext.Text == "Start")
+                if (btnNext.Text == "Start")
             {
                 Task.Run(() => CurrentStep.Start(search_ips));
                 btnSkip.Enabled = false;
