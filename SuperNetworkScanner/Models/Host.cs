@@ -6,9 +6,10 @@
         public string Domain { get; set; }
         public HostStatus Status { get; set; }
         public List<NetworkInterface> NetworkInterfaces { get; set; }
-
-        public string DeviceType { get; set; } = "Unknown";
-        public string DeviceSubType { get; set; } = "Unknown";
+        public string OperatingSystem { get; set; }
+        public string OperatingSystemVersion { get; set; }
+        public string DeviceType { get; set; } 
+        public string DeviceSubType { get; set; } 
         public string Manufacturer { get; set; }
         public string Model { get; set; }
 

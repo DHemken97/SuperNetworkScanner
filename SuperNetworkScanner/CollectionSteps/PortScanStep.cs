@@ -23,7 +23,7 @@ namespace SuperNetworkScanner.CollectionSteps
         public decimal ProgressPercentage => TotalHosts == 0 ? 0 : (decimal)_completed / TotalHosts;
         public List<int> Ports { get; set; } = new List<int>();
         public bool IsCompleted { get; private set; }
-
+        public bool SkipOffline { get; set; }
         private int TotalHosts = 0;
         private int _completed = 0;
 
@@ -48,12 +48,16 @@ namespace SuperNetworkScanner.CollectionSteps
 
             ProgressMessage = "Starting port scan...";
             _progressLog.Enqueue("Port scan initiated.");
+            var search = search_ips;
+
+            if (SkipOffline)
+                search = NetworkMap.Hosts.Where(x => x.Status == HostStatus.Online).SelectMany(x => x.NetworkInterfaces.SelectMany(xx => xx.Ip_Address)).Distinct().ToList();
 
             // Use Task.Run to offload the Parallel.ForEachAsync from the calling thread
             // This ensures that the Start method returns quickly and doesn't block
             Task.Run(async () =>
             {
-                await Parallel.ForEachAsync(search_ips, new ParallelOptions { MaxDegreeOfParallelism = 100 }, async (ip, ct) =>
+                await Parallel.ForEachAsync(search, new ParallelOptions { MaxDegreeOfParallelism = 100 }, async (ip, ct) =>
                 {
                     // Create a Host object for the current IP
                     var currentHost = new Host
@@ -70,7 +74,6 @@ namespace SuperNetworkScanner.CollectionSteps
                     };
 
                     await ScanIpPorts(currentHost, ct); // Pass the host and CancellationToken
-
                     // Only add to NetworkMap.Hosts if services were found for this IP
                     if (currentHost.NetworkInterfaces.First().Services.Any())
                     {
@@ -91,6 +94,8 @@ namespace SuperNetworkScanner.CollectionSteps
                 _progressLog.Enqueue("Port scan finished.");
             });
         }
+
+        
 
         private async Task ScanIpPorts(Host host, CancellationToken ct)
         {
@@ -133,6 +138,7 @@ namespace SuperNetworkScanner.CollectionSteps
                             ServiceName = serviceName,
                             Description = banner,
                         });
+                       
 
                         host.Status = HostStatus.Online; // Mark host as online if at least one port is open
                         HostFoundOrUpdated?.Invoke(host); // **Real-time update**

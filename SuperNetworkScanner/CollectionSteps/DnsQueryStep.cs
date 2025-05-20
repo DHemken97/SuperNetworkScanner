@@ -23,6 +23,8 @@ namespace SuperNetworkScanner.CollectionSteps
         public decimal ProgressPercentage { get; private set; }
 
         public bool IsCompleted { get; private set; }
+        public bool SkipOffline { get; set; }
+
 
         private readonly object _logLock = new();
         private readonly object _progressLock = new();
@@ -32,8 +34,11 @@ namespace SuperNetworkScanner.CollectionSteps
             int total = search_ips.Count;
             int completed = 0;
             int maxParallelism = 20;
+            var search = search_ips;
+            if (SkipOffline)
+                search = NetworkMap.Hosts.Where(x => x.Status == HostStatus.Online).SelectMany(x => x.NetworkInterfaces.SelectMany(xx => xx.Ip_Address)).Distinct().ToList();
 
-            var tasks = Partitioner.Create(search_ips)
+            var tasks = Partitioner.Create(search)
                                    .GetPartitions(maxParallelism)
                                    .Select(partition => Task.Run(() =>
                                    {
