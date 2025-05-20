@@ -1,4 +1,7 @@
-﻿namespace SuperNetworkScanner.Models
+﻿using System.Security.Cryptography;
+using System.Xml.Linq;
+
+namespace SuperNetworkScanner.Models
 {
     public class Service
     {
@@ -6,6 +9,14 @@
         public string Description { get; set; }
         public string ServiceName { get; set; }
         public string Protocol { get; set; }
+
+
+
+        public override string ToString()
+        {
+           if (!string.IsNullOrWhiteSpace(ServiceName)) return ServiceName;
+            return $"Port {Port}";
+        }
     }
 
     public class ServiceComparer : IEqualityComparer<Service>

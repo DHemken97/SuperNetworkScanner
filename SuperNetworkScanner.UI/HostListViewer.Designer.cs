@@ -41,6 +41,7 @@
             treeView1.Name = "treeView1";
             treeView1.Size = new Size(800, 450);
             treeView1.TabIndex = 0;
+            treeView1.AfterSelect += treeView1_AfterSelect;
             treeView1.DoubleClick += treeView1_DoubleClick;
             // 
             // timer1

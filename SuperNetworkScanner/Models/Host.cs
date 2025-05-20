@@ -3,6 +3,7 @@
     public class Host
     {
         public string Hostname { get; set; }
+        public string Domain { get; set; }
         public HostStatus Status { get; set; }
         public List<NetworkInterface> NetworkInterfaces { get; set; }
 
@@ -23,9 +24,9 @@
                     return firstIp;
             else
                 if (string.IsNullOrWhiteSpace(firstIp))
-                   return Hostname;
+                return Hostname;
             else
-                   return $"{Hostname} ({firstIp})";
+                return $"{Hostname} ({firstIp})";
         }
     }
 }

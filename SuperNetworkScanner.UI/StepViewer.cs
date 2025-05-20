@@ -24,8 +24,10 @@ namespace SuperNetworkScanner.UI
                  new DNSQueryStep(),
                //  new PortScanStep(){Ports = PortScanStep.KnownPortServices.Select(x => x.Key).ToList()},
                 // new PortScanStep(){Ports = new List<int>{ 22,80,443,3389, 135 }  },
-                 new PortScanStep(){Ports = new List<int>{ 80,443 }  },
-                 new HttpInfoCollectionStep()
+                 new PortScanStep(){Ports = new List<int>{ 80,443, 135,445, 136, 137,138,139 }  },
+                 new HttpInfoCollectionStep(),
+                 new MsrpcInfoCollectionStep(),
+                 new NetBiosInfoCollectionStep(),
             };
             CollectionSteps.Add(new FinishedStep());
             IncrementStep();
