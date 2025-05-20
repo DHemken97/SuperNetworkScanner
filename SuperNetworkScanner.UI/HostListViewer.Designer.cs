@@ -31,6 +31,7 @@
             components = new System.ComponentModel.Container();
             treeView1 = new TreeView();
             timer1 = new System.Windows.Forms.Timer(components);
+            button1 = new Button();
             SuspendLayout();
             // 
             // treeView1
@@ -47,11 +48,22 @@
             timer1.Interval = 1000;
             timer1.Tick += timer1_Tick;
             // 
+            // button1
+            // 
+            button1.Location = new Point(711, 8);
+            button1.Name = "button1";
+            button1.Size = new Size(75, 23);
+            button1.TabIndex = 1;
+            button1.Text = "button1";
+            button1.UseVisualStyleBackColor = true;
+            button1.Click += button1_Click;
+            // 
             // HostListViewer
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(800, 450);
+            Controls.Add(button1);
             Controls.Add(treeView1);
             Name = "HostListViewer";
             Text = "HostListViewer";
@@ -61,6 +73,7 @@
         #endregion
 
         private TreeView treeView1;
-        private System.Windows.Forms.Timer timer1;
+        public System.Windows.Forms.Timer timer1;
+        private Button button1;
     }
 }

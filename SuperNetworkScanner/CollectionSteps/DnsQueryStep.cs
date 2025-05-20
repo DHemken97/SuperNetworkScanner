@@ -26,7 +26,7 @@ namespace SuperNetworkScanner.CollectionSteps
             {
 
                 ProgressPercentage = (decimal)i / 254m;
-                ProgressMessage = $"WhoIs 192.168.1.{i}?";
+                ProgressMessage = $"WhoIs 192.168.12.{i}?";
                 ProgressLog += ProgressMessage + "...";
                 Thread.Sleep(100);
                 ProgressLog += "Found\r\n";

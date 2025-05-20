@@ -1,7 +1,11 @@
-﻿using System;
+﻿using SuperNetworkScanner.Extensions;
+using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.NetworkInformation;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace SuperNetworkScanner.CollectionSteps
@@ -14,30 +18,68 @@ namespace SuperNetworkScanner.CollectionSteps
 
         public string ProgressMessage { get; private set; }
 
-        public string ProgressLog { get; private set; }
+        public string ProgressLog => string.Join("\r\n", _progressLog.Reverse());
 
-        public decimal ProgressPercentage { get; private set; }
+        public decimal ProgressPercentage => TotalHosts == 0 ? 0 : (decimal)_completed / TotalHosts;
 
         public bool IsCompleted { get; private set; }
 
-        public void Start()
-        {//simulate for now
-            for (int i = 1; i <= 254; i++)
-            {
+        private const int TotalHosts = 254;
+        private int _completed = 0;
 
-                ProgressPercentage = (decimal)i / 254m;
-                ProgressMessage = $"Pinging 192.168.1.{i}";
-                ProgressLog += ProgressMessage + "...";
-                Thread.Sleep(100);
-                ProgressLog += "OK\r\n";
-                NetworkMap.Hosts.Add(new Models.Host()
+        private ConcurrentQueue<string> _progressLog = new();
+        private ConcurrentBag<Models.Host> _foundHosts = new();
+
+        public void Start()
+        {
+            IsCompleted = false;
+            _completed = 0;
+
+            var ips = Enumerable.Range(1, TotalHosts).Select(i => $"192.168.12.{i}");
+
+            Parallel.ForEachAsync(ips, new ParallelOptions { MaxDegreeOfParallelism = 100 }, async (ip, ct) =>
+            {
+                await PingIp(ip);
+                Interlocked.Increment(ref _completed);
+            }).ContinueWith(_ =>
+            {
+                lock (NetworkMap.Hosts)
                 {
-                    NetworkInterfaces = new List<Models.NetworkInterface> {
-                    new Models.NetworkInterface{Ip_Address = new List<string>{$"192.168.1.{i}"}}
-                    }
-                });
+                    NetworkMap.Hosts.AddRange(_foundHosts);
+                }
+                IsCompleted = true;
+            });
+        }
+
+        private async Task PingIp(string ip)
+        {
+            var message = $"Pinging {ip}...";
+            _progressLog.Enqueue(message);
+
+            using Ping ping = new();
+            try
+            {
+                var reply = await ping.SendPingAsync(ip, 1000);
+                if (reply.Status == IPStatus.Success)
+                {
+                    _progressLog.Enqueue($"{message} OK");
+                    _foundHosts.Add(new Models.Host()
+                    {
+                        NetworkInterfaces = new List<Models.NetworkInterface>
+                        {
+                            new Models.NetworkInterface { Ip_Address = new List<string> { ip } }
+                        }
+                    });
+                }
+                else
+                {
+                    _progressLog.Enqueue($"{message} No response");
+                }
             }
-            IsCompleted = true;
+            catch
+            {
+                _progressLog.Enqueue($"{message} Error");
+            }
         }
     }
 }
