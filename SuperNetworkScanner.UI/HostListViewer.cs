@@ -21,36 +21,6 @@ namespace SuperNetworkScanner.UI
         {
             treeView1.Nodes.Clear();
             var hosts = NetworkMap.Hosts.OrderBy(x => x.ToString()).ToList(); //ToList makes a copy
-            //foreach (var host in hosts)
-            //{
-            //    var node = treeView1.Nodes.Add(host.ToString());
-            //    var statusColor = Color.Black;
-            //    if (host.Status == Models.HostStatus.Online) statusColor = Color.Green;
-            //    if (host.Status == Models.HostStatus.Offline) statusColor = Color.Red;
-
-            //    node.ForeColor = statusColor;
-            //    var networkNode = node.Nodes.Add("Network");
-            //    var i = 0;
-            //    foreach (var netInterface in host.NetworkInterfaces)
-            //    {
-            //        var interfaceNode = networkNode.Nodes.Add($"[{i++}] {netInterface.Name}");
-            //        interfaceNode.Nodes.Add($"Name - {netInterface.Name}");
-            //        interfaceNode.Nodes.Add($"MAC - {netInterface.MAC}");
-            //        foreach (var ip in netInterface.Ip_Address)
-            //            interfaceNode.Nodes.Add($"IP - {ip}");
-            //        var servicesNode = interfaceNode.Nodes.Add("Services");
-            //        foreach (var service in netInterface.Services)
-            //        {
-            //            var serviceNode = servicesNode.Nodes.Add(service.ServiceName);
-            //            serviceNode.Nodes.Add($"Port - {service.Port}");
-            //            serviceNode.Nodes.Add($"Protocol - {service.Protocol}");
-            //            serviceNode.Nodes.Add($"Description - {service.Description}");
-
-            //        }
-
-            //    }
-            //}
-
 
             foreach (var host in hosts)
                 AddHostDynamically(host);
@@ -104,6 +74,8 @@ namespace SuperNetworkScanner.UI
             // The root node for the Host object, using its IP Address for the name
             // Or you could use host.ToString() if preferred for the very top level
             var rootNode = treeView1.Nodes.Add(host.ToString());
+            if (host.Status == HostStatus.Offline) rootNode.ForeColor = Color.Red;
+            if (host.Status == HostStatus.Online) rootNode.ForeColor = Color.Green;
 
             // Recursively add properties of the Host object
             // Pass the root node itself and the "Host" as the property name for the initial call
