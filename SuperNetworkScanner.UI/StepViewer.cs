@@ -26,7 +26,6 @@ namespace SuperNetworkScanner.UI
             CollectionSteps.Add(new FinishedStep());
             IncrementStep();
 
-            search_ips = Enumerable.Range(1, 254).Select(i => $"192.168.12.{i}").ToList();
 
         }
 
@@ -43,6 +42,16 @@ namespace SuperNetworkScanner.UI
 
         private void btnNext_Click(object sender, EventArgs e)
         {
+            txtSearchRanges.Enabled = false;
+            if (search_ips == null)
+            {
+                search_ips = new List<string>();
+                var ranges = txtSearchRanges.Text.Split(',');
+                foreach ( var range in ranges ) 
+                    search_ips.AddRange(Enumerable.Range(1, 254).Select(i => range.Replace("x",i.ToString())).ToList());
+                //TODO: make this more flexable with ranges (1-22 for example) 
+            }
+
             if (btnNext.Text == "Start")
             {
                 Task.Run(() => CurrentStep.Start(search_ips));

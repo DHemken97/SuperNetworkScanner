@@ -1,12 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
+﻿using System.Data;
 
 namespace SuperNetworkScanner.UI
 {
@@ -25,7 +17,7 @@ namespace SuperNetworkScanner.UI
         private void RefreshMap()
         {
             treeView1.Nodes.Clear();
-            var hosts = NetworkMap.Hosts.ToList(); //ToList makes a copy
+            var hosts = NetworkMap.Hosts.OrderBy(x => $"{x.Hostname} {x.NetworkInterfaces.FirstOrDefault()?.Ip_Address?.FirstOrDefault()}").ToList(); //ToList makes a copy
             foreach (var host in hosts)
             {
                 var hostname = host.Hostname;

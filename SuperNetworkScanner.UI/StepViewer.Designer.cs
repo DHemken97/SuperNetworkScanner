@@ -37,6 +37,8 @@
             btnSkip = new Button();
             btnNext = new Button();
             timer1 = new System.Windows.Forms.Timer(components);
+            txtSearchRanges = new TextBox();
+            label1 = new Label();
             SuspendLayout();
             // 
             // lblStep
@@ -108,11 +110,29 @@
             timer1.Interval = 1000;
             timer1.Tick += timer1_Tick;
             // 
+            // txtSearchRanges
+            // 
+            txtSearchRanges.Location = new Point(526, 9);
+            txtSearchRanges.Name = "txtSearchRanges";
+            txtSearchRanges.Size = new Size(254, 23);
+            txtSearchRanges.TabIndex = 7;
+            // 
+            // label1
+            // 
+            label1.AutoSize = true;
+            label1.Location = new Point(526, 35);
+            label1.Name = "label1";
+            label1.Size = new Size(83, 15);
+            label1.TabIndex = 8;
+            label1.Text = "Search Ranges";
+            // 
             // StepViewer
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(800, 450);
+            Controls.Add(label1);
+            Controls.Add(txtSearchRanges);
             Controls.Add(btnNext);
             Controls.Add(btnSkip);
             Controls.Add(lblProgressText);
@@ -137,5 +157,7 @@
         private Button btnSkip;
         private Button btnNext;
         private System.Windows.Forms.Timer timer1;
+        private TextBox txtSearchRanges;
+        private Label label1;
     }
 }
