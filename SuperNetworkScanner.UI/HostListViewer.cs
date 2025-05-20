@@ -25,7 +25,8 @@ namespace SuperNetworkScanner.UI
         private void RefreshMap()
         {
             treeView1.Nodes.Clear();
-            foreach(var host in NetworkMap.Hosts)
+            var hosts = NetworkMap.Hosts.ToList(); //ToList makes a copy
+            foreach(var host in hosts)
             {
                 var hostname = host.Hostname;
                 var IPs = host.NetworkInterfaces?.SelectMany(x => x.Ip_Address).Where(x => !string.IsNullOrEmpty(x));

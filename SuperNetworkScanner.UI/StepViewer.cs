@@ -16,7 +16,8 @@ namespace SuperNetworkScanner.UI
             StepIndex = 0;
             CollectionSteps = new List<ICollectionStep>
             {
-                new PingSweepStep()
+                new PingSweepStep(),
+                new DNSQueryStep(),
             };
             IncrementStep();
         }
@@ -34,9 +35,20 @@ namespace SuperNetworkScanner.UI
 
         private void btnNext_Click(object sender, EventArgs e)
         {
-            CurrentStep.Start();
-            btnSkip.Enabled = false;
-            btnNext.Enabled = false;
+            if (btnNext.Text == "Start")
+            {
+                Task.Run(() => CurrentStep.Start());
+                btnSkip.Enabled = false;
+                btnNext.Enabled = false;
+            }
+            else
+            {
+              btnNext.Enabled = true;
+                btnNext.Text = "Start";
+                btnSkip.Enabled = true;
+                IncrementStep();
+            }
+
         }
 
         private void btnSkip_Click(object sender, EventArgs e)
@@ -51,6 +63,12 @@ namespace SuperNetworkScanner.UI
             progressBar1.Value = (int)(CurrentStep.ProgressPercentage*100);
             richTextBox1.Text = CurrentStep?.ProgressLog;
             lblProgressText.Text = CurrentStep?.ProgressMessage;
+
+            if (CurrentStep.IsCompleted)
+            {
+                btnNext.Enabled = true;
+                btnNext.Text = "Next";
+            }
         }
     }
 }

@@ -6,11 +6,11 @@ using System.Threading.Tasks;
 
 namespace SuperNetworkScanner.CollectionSteps
 {
-    public class PingSweepStep : ICollectionStep
+    public class DNSQueryStep : ICollectionStep
     {
-        public string Name => "Ping Sweep";
+        public string Name => "DNS Sweep";
 
-        public string Description => "Ping a range of IPs to see what responds";
+        public string Description => "Try to get Hostnames by DNS Query";
 
         public string ProgressMessage { get; private set; }
 
@@ -26,16 +26,13 @@ namespace SuperNetworkScanner.CollectionSteps
             {
 
                 ProgressPercentage = (decimal)i / 254m;
-                ProgressMessage = $"Pinging 192.168.1.{i}";
+                ProgressMessage = $"WhoIs 192.168.1.{i}?";
                 ProgressLog += ProgressMessage + "...";
                 Thread.Sleep(100);
-                ProgressLog += "OK\r\n";
-                NetworkMap.Hosts.Add(new Models.Host()
-                {
-                    NetworkInterfaces = new List<Models.NetworkInterface> {
-                    new Models.NetworkInterface{Ip_Address = new List<string>{$"192.168.1.{i}"}}
-                    }
-                });
+                ProgressLog += "Found\r\n";
+                var name = $"Machine {i} Test";
+                var host = NetworkMap.Hosts.FirstOrDefault(x => x.NetworkInterfaces.Any(y => y.Ip_Address.Contains($"192.168.1.{i}")));
+                host.Hostname = name;
             }
             IsCompleted = true;
         }
