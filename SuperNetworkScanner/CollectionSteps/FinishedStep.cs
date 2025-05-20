@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 
 namespace SuperNetworkScanner.CollectionSteps
 {
@@ -22,6 +23,8 @@ namespace SuperNetworkScanner.CollectionSteps
 
         public void Start(List<string> search_ips)
         {
+           var json = JsonConvert.SerializeObject(NetworkMap.Hosts, formatting: Formatting.Indented);
+            File.WriteAllText("Hosts.json", json);
         }
     }
 }
