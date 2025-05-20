@@ -25,6 +25,7 @@ namespace SuperNetworkScanner.UI
                //  new PortScanStep(){Ports = PortScanStep.KnownPortServices.Select(x => x.Key).ToList()},
                 // new PortScanStep(){Ports = new List<int>{ 22,80,443,3389, 135 }  },
                  new PortScanStep(){Ports = new List<int>{ 80,443 }  },
+                 new HttpInfoCollectionStep()
             };
             CollectionSteps.Add(new FinishedStep());
             IncrementStep();

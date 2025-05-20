@@ -125,14 +125,13 @@ namespace SuperNetworkScanner.CollectionSteps
 
                         string serviceName = KnownPortServices.GetValueOrDefault(port, $"Port {port}");
                         string banner = await GetServiceBanner(tcpClient, ct); // Pass CancellationToken to banner grabber
-                        var desc = banner.StartsWith("Error") ? await GetHttpResponseHeaders(tcpClient, ip,port,ct) : banner;
 
                         inet.Services.Add(new Service
                         {
                             Port = port,
                             Protocol = "tcp",
                             ServiceName = serviceName,
-                            Description = desc,
+                            Description = banner,
                         });
 
                         host.Status = HostStatus.Online; // Mark host as online if at least one port is open
@@ -227,128 +226,6 @@ namespace SuperNetworkScanner.CollectionSteps
         /// <param name="port">The port of the target (80 for HTTP, 443 for HTTPS).</param>
         /// <param name="ct">Cancellation token.</param>
         /// <returns>A string containing selected HTTP response headers, or an error message.</returns>
-        private async Task<string> GetHttpResponseHeaders(TcpClient tcpClient, string ip, int port, CancellationToken ct)
-        {
-            // NetworkStream stream = null;
-            // SslStream sslStream = null;
-            return "HTTP Check Disabled";
-            try
-            {
-             var   stream = tcpClient.GetStream();
-              var  sslStream = new SslStream(stream, false);
-
-                if (port == 443 || port == 8443) // Handle HTTPS
-                {
-                    try
-                    {
-
-                        // The `ip` parameter is used here for the targetHostName,
-                        // as we might not have a hostname for the IP address.
-                        // Validation will fail if certificate's subject doesn't match the IP.
-                        // You might need to add a RemoteCertificateValidationCallback
-                        // to handle self-signed certs or IP mismatches if this is too strict.
-                        await sslStream.AuthenticateAsClientAsync(ip, clientCertificates: null,
-                                                                 enabledSslProtocols: SslProtocols.Tls12 | SslProtocols.Tls13, // Prioritize modern TLS
-                                                                 checkCertificateRevocation: false); // Can set to true for stricter checks
-                      //  stream = sslStream; // Use the SSL stream for further communication
-                    }
-                    catch (AuthenticationException authEx)
-                    {
-                        return $"HTTPS Auth Error: {authEx.Message}";
-                    }
-                    catch (Exception sslEx)
-                    {
-                        return $"HTTPS SSL Error: {sslEx.Message}";
-                    }
-                }
-
-                // Construct a minimal HTTP GET request for the root path
-                // Using Host header with IP directly as we don't have domain names
-                string httpRequest = $"GET / HTTP/1.1\r\nHost: {ip}\r\nConnection: close\r\n\r\n";
-                byte[] requestBytes = Encoding.ASCII.GetBytes(httpRequest);
-
-                await sslStream.WriteAsync(requestBytes, 0, requestBytes.Length, ct);
-
-                // Read the response
-                byte[] buffer = new byte[tcpClient.ReceiveBufferSize];
-                StringBuilder responseBuilder = new StringBuilder();
-                int bytesRead;
-
-                using (var cts = new CancellationTokenSource(TimeSpan.FromSeconds(3))) // Timeout for reading HTTP response
-                using (var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(ct, cts.Token))
-                {
-                    try
-                    {
-                        // Read until we encounter an empty line (end of headers) or timeout
-                        while ((bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length, linkedCts.Token)) > 0)
-                        {
-                            string chunk = Encoding.ASCII.GetString(buffer, 0, bytesRead);
-                            responseBuilder.Append(chunk);
-
-                            // Simple check for end of headers (double newline)
-                            if (responseBuilder.ToString().Contains("\r\n\r\n"))
-                            {
-                                break;
-                            }
-
-                            // If we've read a lot of data and still no double newline, break to avoid OOM or infinite loop
-                            if (responseBuilder.Length > 16 * 1024) // Cap response size to 16KB for headers
-                            {
-                                _progressLog.Enqueue($"    Too much data received for HTTP headers on {ip}:{port}, truncating.");
-                                break;
-                            }
-                        }
-                    }
-                    catch (OperationCanceledException)
-                    {
-                        return "HTTP/S header read timed out or cancelled.";
-                    }
-                }
-
-                string fullResponse = responseBuilder.ToString();
-                if (string.IsNullOrEmpty(fullResponse))
-                {
-                    return "No HTTP/S response received.";
-                }
-
-                // Extract relevant headers
-                var lines = fullResponse.Split(new[] { "\r\n" }, StringSplitOptions.None);
-                var interestingHeaders = new List<string>();
-
-                // Get the status line (e.g., HTTP/1.1 200 OK)
-                if (lines.Length > 0)
-                {
-                    interestingHeaders.Add(lines[0]);
-                }
-
-                // Look for common headers
-                foreach (var line in lines)
-                {
-                    if (line.StartsWith("Server:", StringComparison.OrdinalIgnoreCase) ||
-                        line.StartsWith("X-Powered-By:", StringComparison.OrdinalIgnoreCase) ||
-                        line.StartsWith("Content-Type:", StringComparison.OrdinalIgnoreCase) ||
-                        line.StartsWith("Location:", StringComparison.OrdinalIgnoreCase)) // Useful for redirects
-                    {
-                        interestingHeaders.Add(line);
-                    }
-                    if (string.IsNullOrWhiteSpace(line)) // Stop after headers
-                    {
-                        break;
-                    }
-                }
-
-                return string.Join(" | ", interestingHeaders).Trim();
-            }
-            catch (Exception ex)
-            {
-                return $"Error getting HTTP/S headers: {ex.Message}";
-            }
-            finally
-            {
-               // sslStream?.Dispose(); // Dispose SslStream if used
-                // The underlying NetworkStream will be closed with TcpClient.Close() when tcpClient is disposed
-            }
-        }
         // ---
         // New method for updating NetworkMap.Hosts and triggering real-time updates
         // ---
