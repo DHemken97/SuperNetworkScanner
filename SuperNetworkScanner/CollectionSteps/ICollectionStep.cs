@@ -14,6 +14,6 @@ namespace SuperNetworkScanner.CollectionSteps
         public string ProgressLog { get; }
         public decimal ProgressPercentage { get; }
         public bool IsCompleted { get; }
-        public void Start();
+        public void Start(List<string> search_ips);
     }
 }

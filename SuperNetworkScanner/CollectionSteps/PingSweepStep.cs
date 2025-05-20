@@ -1,4 +1,5 @@
 ﻿using SuperNetworkScanner.Extensions;
+using SuperNetworkScanner.Models;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -7,6 +8,7 @@ using System.Net.NetworkInformation;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using NetworkInterface = SuperNetworkScanner.Models.NetworkInterface;
 
 namespace SuperNetworkScanner.CollectionSteps
 {
@@ -24,20 +26,19 @@ namespace SuperNetworkScanner.CollectionSteps
 
         public bool IsCompleted { get; private set; }
 
-        private const int TotalHosts = 254;
+        private int TotalHosts = 0;
         private int _completed = 0;
 
-        private ConcurrentQueue<string> _progressLog = new();
-        private ConcurrentBag<Models.Host> _foundHosts = new();
+        private readonly ConcurrentQueue<string> _progressLog = new();
+        private readonly ConcurrentBag<Host> _foundHosts = new();
 
-        public void Start()
+        public void Start(List<string> search_ips)
         {
             IsCompleted = false;
             _completed = 0;
+            TotalHosts = search_ips.Count;
 
-            var ips = Enumerable.Range(1, TotalHosts).Select(i => $"192.168.12.{i}");
-
-            Parallel.ForEachAsync(ips, new ParallelOptions { MaxDegreeOfParallelism = 100 }, async (ip, ct) =>
+            Parallel.ForEachAsync(search_ips, new ParallelOptions { MaxDegreeOfParallelism = 100 }, async (ip, ct) =>
             {
                 await PingIp(ip);
                 Interlocked.Increment(ref _completed);
@@ -45,8 +46,29 @@ namespace SuperNetworkScanner.CollectionSteps
             {
                 lock (NetworkMap.Hosts)
                 {
-                    NetworkMap.Hosts.AddRange(_foundHosts);
+                    foreach (var foundHost in _foundHosts)
+                    {
+                        var ip = foundHost.NetworkInterfaces.First().Ip_Address.First();
+                        var existingHost = NetworkMap.Hosts
+                            .FirstOrDefault(h => h.NetworkInterfaces
+                            .Any(ni => ni.Ip_Address.Contains(ip)));
+
+                        if (existingHost != null)
+                        {
+                            var ni = existingHost.NetworkInterfaces.FirstOrDefault();
+                            if (ni != null && !ni.Ip_Address.Contains(ip))
+                                ni.Ip_Address.Add(ip);
+
+                            existingHost.Status = HostStatus.Online;
+                        }
+                        else
+                        {
+                            foundHost.Status = HostStatus.Online;
+                            NetworkMap.Hosts.Add(foundHost);
+                        }
+                    }
                 }
+
                 IsCompleted = true;
             });
         }
@@ -63,12 +85,16 @@ namespace SuperNetworkScanner.CollectionSteps
                 if (reply.Status == IPStatus.Success)
                 {
                     _progressLog.Enqueue($"{message} OK");
-                    _foundHosts.Add(new Models.Host()
+                    _foundHosts.Add(new Host
                     {
-                        NetworkInterfaces = new List<Models.NetworkInterface>
+                        NetworkInterfaces = new List<NetworkInterface>
                         {
-                            new Models.NetworkInterface { Ip_Address = new List<string> { ip } }
-                        }
+                            new NetworkInterface
+                            {
+                                Ip_Address = new List<string> { ip }
+                            }
+                        },
+                        Status = HostStatus.Online
                     });
                 }
                 else

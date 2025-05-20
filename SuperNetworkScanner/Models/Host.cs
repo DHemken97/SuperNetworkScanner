@@ -3,6 +3,7 @@
     public class Host
     {
         public string Hostname { get; set; }
+        public HostStatus Status {get;set;}
         public List<NetworkInterface> NetworkInterfaces { get; set; }
 
     }

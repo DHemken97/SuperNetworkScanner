@@ -19,7 +19,7 @@ namespace SuperNetworkScanner.UI
 
         private void timer1_Tick(object sender, EventArgs e)
         {
-            RefreshMap();
+            //RefreshMap();
         }
 
         private void RefreshMap()
@@ -34,10 +34,17 @@ namespace SuperNetworkScanner.UI
                 var multiple = IPs?.Count() > 1 ? $" + {IPs.Count() - 1} more" : "";
                 if (string.IsNullOrWhiteSpace(hostname)) hostname = firstIp;
                 var node = treeView1.Nodes.Add($"{hostname} ({firstIp}{multiple})");
+                var statusColor = Color.Black;
+                if (host.Status == Models.HostStatus.Online) statusColor = Color.Green;
+                if (host.Status == Models.HostStatus.Offline) statusColor = Color.Red;
+
+                node.ForeColor = statusColor;
                 var networkNode = node.Nodes.Add("Network");
+                var i = 0;
                 foreach (var netInterface in host.NetworkInterfaces)
                 {
-                    var interfaceNode = networkNode.Nodes.Add(netInterface.Name);
+                    var interfaceNode = networkNode.Nodes.Add($"[{i++}] {netInterface.Name}");
+                    interfaceNode.Nodes.Add($"Name - {netInterface.Name}");
                     interfaceNode.Nodes.Add($"MAC - {netInterface.MAC}");
                     foreach (var ip in netInterface.Ip_Address)
                         interfaceNode.Nodes.Add($"IP - {ip}");
@@ -48,6 +55,11 @@ namespace SuperNetworkScanner.UI
         private void button1_Click(object sender, EventArgs e)
         {
             RefreshMap();
+        }
+
+        private void HostListViewer_Load(object sender, EventArgs e)
+        {
+
         }
     }
 }

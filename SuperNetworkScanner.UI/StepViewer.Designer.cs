@@ -122,6 +122,7 @@
             Controls.Add(lblStep);
             Name = "StepViewer";
             Text = "Form1";
+            Load += StepViewer_Load;
             ResumeLayout(false);
             PerformLayout();
         }

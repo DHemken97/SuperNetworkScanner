@@ -5,6 +5,7 @@ namespace SuperNetworkScanner.UI
     public partial class StepViewer : Form
     {
         private HostListViewer hostViewer;
+        private List<string> search_ips;
 
         public List<ICollectionStep> CollectionSteps { get; }
         public ICollectionStep CurrentStep { get; private set; }
@@ -14,14 +15,19 @@ namespace SuperNetworkScanner.UI
             InitializeComponent();
             hostViewer = new HostListViewer();
             hostViewer.Show();
-           
+
             StepIndex = 0;
             CollectionSteps = new List<ICollectionStep>
             {
+                new LocalARPTableStep(),
                 new PingSweepStep(),
-                new DNSQueryStep(),
+                 new DNSQueryStep(),
             };
+            CollectionSteps.Add(new FinishedStep());
             IncrementStep();
+
+            search_ips = Enumerable.Range(1, 254).Select(i => $"192.168.12.{i}").ToList();
+
         }
 
         private void IncrementStep()
@@ -39,7 +45,7 @@ namespace SuperNetworkScanner.UI
         {
             if (btnNext.Text == "Start")
             {
-                Task.Run(() => CurrentStep.Start());
+                Task.Run(() => CurrentStep.Start(search_ips));
                 btnSkip.Enabled = false;
                 btnNext.Enabled = false;
                 timer1.Start();
@@ -48,7 +54,7 @@ namespace SuperNetworkScanner.UI
             }
             else
             {
-              btnNext.Enabled = true;
+                btnNext.Enabled = true;
                 btnNext.Text = "Start";
                 btnSkip.Enabled = true;
                 IncrementStep();
@@ -63,20 +69,27 @@ namespace SuperNetworkScanner.UI
 
         private void timer1_Tick(object sender, EventArgs e)
         {
+            progressBar1.Value = (int)(CurrentStep.ProgressPercentage * 100);
+
             if (CurrentStep.IsCompleted)
             {
                 btnNext.Enabled = true;
                 btnNext.Text = "Next";
                 timer1.Stop();
                 hostViewer.timer1.Stop();
+                progressBar1.Value = 100;
 
             }
             lblStep.Text = $"Step {StepIndex} - {CurrentStep?.Name}";
             lblDescription.Text = CurrentStep?.Description;
-            progressBar1.Value = (int)(CurrentStep.ProgressPercentage*100);
             richTextBox1.Text = CurrentStep?.ProgressLog;
             lblProgressText.Text = CurrentStep?.ProgressMessage;
 
+
+        }
+
+        private void StepViewer_Load(object sender, EventArgs e)
+        {
 
         }
     }
